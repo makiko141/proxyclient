@@ -31,7 +31,7 @@ func handleTunneling(w http.ResponseWriter, r *http.Request) {
 func transfer(destination io.WriteCloser, source io.ReadCloser) {
 	defer destination.Close()
 	defer source.Close()
-	io.Copy(destination, source)
+	io.Copy(destination, source) // nolint: errcheck
 }
 func handleHTTP(w http.ResponseWriter, req *http.Request) {
 	resp, err := http.DefaultTransport.RoundTrip(req)
@@ -42,7 +42,7 @@ func handleHTTP(w http.ResponseWriter, req *http.Request) {
 	defer resp.Body.Close()
 	copyHeader(w.Header(), resp.Header)
 	w.WriteHeader(resp.StatusCode)
-	io.Copy(w, resp.Body)
+	io.Copy(w, resp.Body) // nolint: errcheck
 }
 func copyHeader(dst, src http.Header) {
 	for k, vv := range src {
@@ -82,12 +82,15 @@ func handleSocks4(conn net.Conn, t *testing.T) {
 	targetConn, err := net.DialTimeout("tcp", target, 10*time.Second)
 	if err != nil {
 		// Send failure response
-		conn.Write([]byte{0, 91, 0, 0, 0, 0, 0, 0}) // Request rejected
+		// Request rejected
+		conn.Write([]byte{0, 91, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
+
 		return
 	}
 
 	// Send success response
-	conn.Write([]byte{0, 90, 0, 0, 0, 0, 0, 0}) // Request granted
+	// Request granted
+	conn.Write([]byte{0, 90, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 
 	// Proxy data between client and target
 	go transfer(targetConn, conn)
@@ -115,7 +118,7 @@ func handleSocks5(conn net.Conn, t *testing.T) {
 	}
 
 	// 2. Send auth method choice (no auth: 0x00)
-	conn.Write([]byte{5, 0})
+	conn.Write([]byte{5, 0}) // nolint: errcheck
 
 	// 3. Read connection request
 	header := make([]byte, 4)
@@ -137,7 +140,8 @@ func handleSocks5(conn net.Conn, t *testing.T) {
 		addr := make([]byte, 4)
 		_, err = io.ReadFull(conn, addr)
 		if err != nil {
-			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // General failure
+			// General failure
+			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 			return
 		}
 		host = net.IPv4(addr[0], addr[1], addr[2], addr[3]).String()
@@ -146,14 +150,14 @@ func handleSocks5(conn net.Conn, t *testing.T) {
 		lenByte := make([]byte, 1)
 		_, err = io.ReadFull(conn, lenByte)
 		if err != nil {
-			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0})
+			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 			return
 		}
 		domainLen := int(lenByte[0])
 		domain := make([]byte, domainLen)
 		_, err = io.ReadFull(conn, domain)
 		if err != nil {
-			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0})
+			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 			return
 		}
 		host = string(domain)
@@ -162,13 +166,14 @@ func handleSocks5(conn net.Conn, t *testing.T) {
 		addr := make([]byte, 16)
 		_, err = io.ReadFull(conn, addr)
 		if err != nil {
-			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0})
+			conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 			return
 		}
 		host = net.IP(addr).String()
 
 	default:
-		conn.Write([]byte{5, 8, 0, 1, 0, 0, 0, 0, 0, 0}) // Address type not supported
+		// Address type not supported
+		conn.Write([]byte{5, 8, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 		return
 	}
 
@@ -176,25 +181,28 @@ func handleSocks5(conn net.Conn, t *testing.T) {
 	portBytes := make([]byte, 2)
 	_, err = io.ReadFull(conn, portBytes)
 	if err != nil {
-		conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0})
+		conn.Write([]byte{5, 1, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 		return
 	}
 	port = uint16(portBytes[0])<<8 | uint16(portBytes[1])
 
 	// Connect to destination if CMD is CONNECT (1)
 	if cmd != 1 {
-		conn.Write([]byte{5, 7, 0, 1, 0, 0, 0, 0, 0, 0}) // Command not supported
+		// Command not supported
+		conn.Write([]byte{5, 7, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 		return
 	}
 
 	targetConn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), 10*time.Second)
 	if err != nil {
-		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0}) // Host unreachable
+		// Host unreachable
+		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 		return
 	}
 
 	// Send success response
-	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0}) // Success
+	// Success
+	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0}) // nolint: errcheck
 
 	// Proxy data between client and target
 	go transfer(targetConn, conn)

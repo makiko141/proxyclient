@@ -37,21 +37,11 @@ func ProxySocks5(u *url.URL, o *Options) http.RoundTripper {
 		}
 	}
 
-	addr := u.Hostname()
-	port := u.Port()
-	if port == "" {
-		port = "1080"
-	}
+	d, _ := proxy.SOCKS5("tcp", net.JoinHostPort(u.Hostname(), u.Port()), auth, dialer)
 
-	d, _ := proxy.SOCKS5("tcp", net.JoinHostPort(addr, port), auth, dialer)
-
-	if xd, ok := d.(proxy.ContextDialer); ok {
-		tr.DialContext = xd.DialContext
-		tr.DialTLSContext = xd.DialContext
-	} else {
-		tr.Dial = d.Dial
-		tr.DialTLS = dialer.Dial
-	}
+	xd := d.(proxy.ContextDialer)
+	tr.DialContext = xd.DialContext
+	tr.DialTLSContext = xd.DialContext
 
 	return tr
 }
@@ -63,7 +53,6 @@ func ProxySocks4(u *url.URL, o *Options) http.RoundTripper {
 
 	if o.Timeout > 0 {
 		proxyURL += "?timeout=" + o.Timeout.String()
-
 	}
 
 	tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
