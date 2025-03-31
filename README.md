@@ -3,7 +3,14 @@ Enhanced HTTP Client with Multi-Proxy Support for Go
 
 `ProxyClient` is a Go package that extends the standard `http.Client` to seamlessly support multiple proxy protocols, including **HTTP/HTTPS, SOCKS4, SOCKS5, SSL, V2Ray, SSR/SS, and MTProto**. It provides a unified interface for developers to interact with diverse proxy types without manual low-level configurations.
 
----
+[![Tests](https://github.com/cnlangzi/proxyclient/actions/workflows/tests.yml/badge.svg)](https://github.com/cnlangzi/proxyclient/actions/workflows/tests.yml)
+[![Codecov](https://codecov.io/gh/cnlangzi/proxyclient/branch/main/graph/badge.svg)](https://codecov.io/gh/cnlangzi/proxyclient)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cnlangzi/proxyclient)](https://goreportcard.com/report/github.com/cnlangzi/proxyclient)
+[![Go Reference](https://pkg.go.dev/badge/github.com/cnlangzi/proxyclient.svg)](https://pkg.go.dev/github.com/cnlangzi/proxyclient)
+[![GitHub Release](https://img.shields.io/github/v/release/cnlangzi/proxyclient)](https://github.com/cnlangzi/proxyclient/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/cnlangzi/proxyclient/compare)
+
 
 ### **Features**  
 • **Multi-Protocol Support**:  
@@ -17,7 +24,7 @@ Enhanced HTTP Client with Multi-Proxy Support for Go
 • **Authentication**: Built-in handling for username/password, encryption keys, and token-based auth.  
 • **Compatibility**: Fully compatible with Go’s standard `http.Client` methods (`Get`, `Post`, etc.).  
 
----
+
 
 ### **Quick Start**  
 #### **Installation**  
@@ -59,9 +66,10 @@ func main() {
 | Protocol  | Example Config                          |  
 |-----------|-----------------------------------------|  
 | HTTP      | `http://user:pass@127.0.0.1:8080`       |  
-| HTTPs     | `http://user:pass@127.0.0.1:8080`       |  
+| HTTPs     | `https://user:pass@127.0.0.1:8080`      |  
 | SOCKS4    | `socks4://user:pass@127.0.0.1:1080`     |  
-| SOCKS5    | `socks5://user:pass@127.0.0.1:1080`     |  
+| SOCKS5    | `socks5://user:pass@127.0.0.1:1080`     | 
+| ssh       | `ssh://user:pass@127.0.0.1:2222`      |   
 | V2Ray     | `v2ray://user:pass@127.0.0.1:8080`      |  
 | SS        | `ss://user:pass@127.0.0.1:8080`         |  
 | SSR       | `ssr://user:pass@127.0.0.1:8080`        |  

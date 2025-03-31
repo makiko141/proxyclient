@@ -69,7 +69,7 @@ func ProxySocks4(u *url.URL, o *Options) http.RoundTripper {
 	tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		return socks.Dial(proxyURL)(network, addr)
 	}
-	tr.DialTLSContext = tr.DialContext
+	// tr.DialTLSContext = tr.DialContext
 
 	return tr
 }

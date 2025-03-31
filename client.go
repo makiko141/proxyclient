@@ -24,7 +24,7 @@ func New(proxyURL string, options ...Option) (*http.Client, error) {
 	}
 
 	if opt.Transport == nil {
-		opt.Transport = http.DefaultTransport.(*http.Transport)
+		opt.Transport = &http.Transport{}
 	}
 
 	if opt.Timeout > 0 {
