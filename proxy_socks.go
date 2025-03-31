@@ -18,18 +18,14 @@ func init() {
 
 }
 
-func ProxySocks5(u *url.URL, o Options) http.RoundTripper {
+func ProxySocks5(u *url.URL, o *Options) http.RoundTripper {
 
-	transport := createTransport()
-
-	for _, it := range o.WithTransport {
-		it(transport)
-	}
+	tr := createTransport(o)
 
 	dialer := &net.Dialer{}
 
-	if o.DialTimeout > 0 {
-		dialer.Timeout = o.DialTimeout
+	if o.Timeout > 0 {
+		dialer.Timeout = o.Timeout
 	}
 
 	var auth *proxy.Auth
@@ -50,27 +46,23 @@ func ProxySocks5(u *url.URL, o Options) http.RoundTripper {
 	d, _ := proxy.SOCKS5("tcp", net.JoinHostPort(addr, port), auth, dialer)
 
 	if xd, ok := d.(proxy.ContextDialer); ok {
-		transport.DialContext = xd.DialContext
-		transport.DialTLSContext = xd.DialContext
+		tr.DialContext = xd.DialContext
+		tr.DialTLSContext = xd.DialContext
 	} else {
-		transport.Dial = d.Dial
-		transport.DialTLS = dialer.Dial
+		tr.Dial = d.Dial
+		tr.DialTLS = dialer.Dial
 	}
 
-	return transport
+	return tr
 }
 
-func ProxySocks4(u *url.URL, o Options) http.RoundTripper {
-	tr := createTransport()
-
-	for _, it := range o.WithTransport {
-		it(tr)
-	}
+func ProxySocks4(u *url.URL, o *Options) http.RoundTripper {
+	tr := createTransport(o)
 
 	proxyURL := u.String()
 
-	if o.DialTimeout > 0 {
-		proxyURL += "?timeout=" + o.DialTimeout.String()
+	if o.Timeout > 0 {
+		proxyURL += "?timeout=" + o.Timeout.String()
 
 	}
 

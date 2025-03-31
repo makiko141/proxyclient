@@ -36,7 +36,7 @@ import (
 
 func main() {
     // Create a client with SOCKS5 proxy
-    client, err := proxyclient.New(http.DefaultClient,"socks5://user:pass@127.0.0.1:1080")
+    client, err := proxyclient.New("socks5://user:pass@127.0.0.1:1080")
     
     if err != nil {
         panic(err)

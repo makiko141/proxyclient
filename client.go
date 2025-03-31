@@ -11,13 +11,24 @@ var (
 	ErrUnknownProxy = errors.New("proxyclient: unknown proxy protocol")
 )
 
-func New(proxyURL string) (*http.Client, error) {
-	return With(proxyURL, &http.Client{})
-}
+func New(proxyURL string, options ...Option) (*http.Client, error) {
+	opt := &Options{}
+	for _, o := range options {
+		o(opt)
+	}
 
-func With(proxyURL string, c *http.Client) (*http.Client, error) {
-	if proxyURL == "" {
-		return c, nil
+	c := opt.Client
+
+	if c == nil {
+		c = &http.Client{}
+	}
+
+	if opt.Transport == nil {
+		opt.Transport = http.DefaultTransport.(*http.Transport)
+	}
+
+	if opt.Timeout > 0 {
+		c.Timeout = opt.Timeout
 	}
 
 	u, err := url.Parse(proxyURL)
@@ -30,7 +41,7 @@ func With(proxyURL string, c *http.Client) (*http.Client, error) {
 		return nil, ErrUnknownProxy
 	}
 
-	c.Transport = f(u)
+	c.Transport = f(u, opt)
 
 	return c, nil
 }
