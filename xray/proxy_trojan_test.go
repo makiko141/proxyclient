@@ -1,4 +1,4 @@
-package v2ray
+package xray
 
 import (
 	"crypto/tls"
@@ -12,7 +12,7 @@ import (
 	"github.com/cnlangzi/proxyclient"
 )
 
-func TestProxyVmess(t *testing.T) {
+func TestProxyTrojan(t *testing.T) {
 	if os.Getenv("GITHUB_REF") != "" {
 		t.Skip("Skip test in GitHub Actions")
 	}
@@ -22,9 +22,10 @@ func TestProxyVmess(t *testing.T) {
 			InsecureSkipVerify: true,
 		},
 	}
-	proxyURL := "vmess://eyJ2IjogIjIiLCAicHMiOiAiXHU1YzcxXHU0ZTFjXHU3NzAxXHU5NzUyXHU1YzliXHU1ZTAyIFx1ODA1NFx1OTAxYSIsICJhZGQiOiAidjQwLmhlZHVpYW4ubGluayIsICJwb3J0IjogIjMwODQwIiwgInR5cGUiOiAibm9uZSIsICJpZCI6ICJjYmIzZjg3Ny1kMWZiLTM0NGMtODdhOS1kMTUzYmZmZDU0ODQiLCAiYWlkIjogIjAiLCAibmV0IjogIndzIiwgInBhdGgiOiAiL2luZGV4IiwgImhvc3QiOiAiYXBpMTAwLWNvcmUtcXVpYy1sZi5hbWVtdi5jb20iLCAidGxzIjogIiJ9"
 
-	client, err := proxyclient.New(proxyURL, proxyclient.WithTransport(tr), proxyclient.WithTimeout(30*time.Second))
+	trojanURL := "trojan://a38c9e28-9960-4e31-9f18-ed2495a756aa@vt-bana2-cn-11.ghpgwqswodgzv.com:40021?allowInsecure=0&sni=vt-bana2-cn-11.ghpgwqswodgzv.com&type=ws&host=vt-bana2-cn-11.ghpgwqswodgzv.com&path=%2Fdl_media#1%7C%F0%9F%87%AD%F0%9F%87%B010%20%7C%20%202.5MB/s"
+
+	client, err := proxyclient.New(trojanURL, proxyclient.WithTransport(tr), proxyclient.WithTimeout(30*time.Second))
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -38,7 +39,7 @@ func TestProxyVmess(t *testing.T) {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			t.Fatalf("Failed to make HTTP request: %v", err)
+			t.Fatalf("Failed to make HTTPS request: %v", err)
 		}
 		defer resp.Body.Close()
 
@@ -47,7 +48,7 @@ func TestProxyVmess(t *testing.T) {
 		}
 
 		buf, _ := io.ReadAll(resp.Body)
-		fmt.Printf("HTTP response: %s\n", string(buf))
+		fmt.Printf("response: %s\n", string(buf))
 	})
 
 	t.Run("https", func(t *testing.T) {
@@ -68,6 +69,6 @@ func TestProxyVmess(t *testing.T) {
 		}
 
 		buf, _ := io.ReadAll(resp.Body)
-		fmt.Printf("HTTPS response: %s\n", string(buf))
+		fmt.Printf("response: %s\n", string(buf))
 	})
 }
